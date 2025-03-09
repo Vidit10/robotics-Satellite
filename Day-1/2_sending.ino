@@ -1,25 +1,11 @@
-/*
-  ESP-NOW Demo - Transmit
-  esp-now-demo-xmit.ino
-  Sends data to Responder
-
-  DroneBot Workshop 2022
-  https://dronebotworkshop.com
-*/
-
-// Include Libraries
 #include <esp_now.h>
 #include <WiFi.h>
 
-// Variables for test data
-int int_value;
-float float_value;
-bool bool_value = true;
+// REPLACE WITH YOUR RECEIVER MAC Address
+uint8_t broadcastAddress[] = {0x3C, 0x8A, 0x1F, 0x09, 0x45, 0x1C};
 
-// MAC Address of responder - edit as required
-uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0x7A, 0xAE, 0x7C};
-
-// Define a data structure
+// Structure example to send data
+// Must match the receiver structure
 typedef struct struct_message
 {
     char a[32];
@@ -28,13 +14,12 @@ typedef struct struct_message
     bool d;
 } struct_message;
 
-// Create a structured object
+// Create a struct_message called myData
 struct_message myData;
 
-// Peer info
 esp_now_peer_info_t peerInfo;
 
-// Callback function called when data is sent
+// callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
     Serial.print("\r\nLast Packet Send Status:\t");
@@ -43,21 +28,21 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 
 void setup()
 {
-
-    // Set up Serial Monitor
+    // Init Serial Monitor
     Serial.begin(115200);
 
-    // Set ESP32 as a Wi-Fi Station
+    // Set device as a Wi-Fi Station
     WiFi.mode(WIFI_STA);
 
-    // Initilize ESP-NOW
+    // Init ESP-NOW
     if (esp_now_init() != ESP_OK)
     {
         Serial.println("Error initializing ESP-NOW");
         return;
     }
 
-    // Register the send callback
+    // Once ESPNow is successfully Init, we will register for Send CB to
+    // get the status of Trasnmitted packet
     esp_now_register_send_cb(OnDataSent);
 
     // Register peer
@@ -75,34 +60,22 @@ void setup()
 
 void loop()
 {
-
-    // Create test data
-
-    // Generate a random integer
-    int_value = random(1, 20);
-
-    // Use integer to make a new float
-    float_value = 1.3 * int_value;
-
-    // Invert the boolean value
-    bool_value = !bool_value;
-
-    // Format structured data
-    strcpy(myData.a, "Welcome to the Workshop!");
-    myData.b = int_value;
-    myData.c = float_value;
-    myData.d = bool_value;
+    // Set values to send
+    strcpy(myData.a, "THIS IS A CHAR");
+    myData.b = random(1, 20);
+    myData.c = 1.2 * myData.b;
+    myData.d = !myData.d;
 
     // Send message via ESP-NOW
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
 
     if (result == ESP_OK)
     {
-        Serial.println("Sending confirmed");
+        Serial.println("Sent with success");
     }
     else
     {
-        Serial.println("Sending error");
+        Serial.println("Error sending the data");
     }
     delay(2000);
 }

@@ -1,17 +1,8 @@
-/*
-  ESP-NOW Demo - Receive
-  esp-now-demo-rcv.ino
-  Reads data from Initiator
-
-  DroneBot Workshop 2022
-  https://dronebotworkshop.com
-*/
-
-// Include Libraries
 #include <esp_now.h>
 #include <WiFi.h>
 
-// Define a data structure
+// Structure example to receive data
+// Must match the sender structure
 typedef struct struct_message
 {
     char a[32];
@@ -20,43 +11,44 @@ typedef struct struct_message
     bool d;
 } struct_message;
 
-// Create a structured object
+// Create a struct_message called myData
 struct_message myData;
 
-// Callback function executed when data is received
+// callback function that will be executed when data is received
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
     memcpy(&myData, incomingData, sizeof(myData));
-    Serial.print("Data received: ");
+    Serial.print("Bytes received: ");
     Serial.println(len);
-    Serial.print("Character Value: ");
+    Serial.print("Char: ");
     Serial.println(myData.a);
-    Serial.print("Integer Value: ");
+    Serial.print("Int: ");
     Serial.println(myData.b);
-    Serial.print("Float Value: ");
+    Serial.print("Float: ");
     Serial.println(myData.c);
-    Serial.print("Boolean Value: ");
+    Serial.print("Bool: ");
     Serial.println(myData.d);
     Serial.println();
 }
 
 void setup()
 {
-    // Set up Serial Monitor
+    // Initialize Serial Monitor
     Serial.begin(115200);
 
-    // Set ESP32 as a Wi-Fi Station
+    // Set device as a Wi-Fi Station
     WiFi.mode(WIFI_STA);
 
-    // Initilize ESP-NOW
+    // Init ESP-NOW
     if (esp_now_init() != ESP_OK)
     {
         Serial.println("Error initializing ESP-NOW");
         return;
     }
 
-    // Register callback function
-    esp_now_register_recv_cb(OnDataRecv);
+    // Once ESPNow is successfully Init, we will register for recv CB to
+    // get recv packer info
+    esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
 }
 
 void loop()

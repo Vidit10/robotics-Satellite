@@ -1,13 +1,3 @@
-/*
-  ESP-NOW Multi Unit Demo
-  esp-now-multi.ino
-  Broadcasts control messages to all devices in network
-  Load script on multiple devices
-
-  DroneBot Workshop 2022
-  https://dronebotworkshop.com
-*/
-
 // Include Libraries
 #include <WiFi.h>
 #include <esp_now.h>
